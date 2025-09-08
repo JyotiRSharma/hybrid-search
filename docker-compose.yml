@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    platform: linux/arm64 
+    environment:
+      POSTGRES_DB: magdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d magdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/magdb
+      KW_WEIGHT: "0.5"
+      VEC_WEIGHT: "0.5"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
