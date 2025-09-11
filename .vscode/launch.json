@@ -1,0 +1,47 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // A) Launch FastAPI (no attach needed)
+      "name": "FastAPI (launch)",
+      "type": "python",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"],
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      // B) Attach to a process started with debugpy --listen 5678
+      "name": "Attach to debugpy (local)",
+      "type": "python",
+      "request": "attach",
+      "connect": { "host": "localhost", "port": 5678 },
+      "justMyCode": true
+    },
+    {
+      // C) Debug a single script (e.g., backfill)
+      "name": "Script: backfill_embeddings.py",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/backfill_embeddings.py",
+      "args": [
+        "--db", "postgresql+asyncpg://postgres:postgres@localhost:5432/magdb",
+        "--only_null", "--batch", "256"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      // D) Debug pytest (breakpoints inside tests)
+      "name": "Pytest (debug)",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-q", "-k", "not slow"],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}

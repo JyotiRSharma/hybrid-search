@@ -20,49 +20,49 @@ async def search(req: SearchRequest, session: AsyncSession = Depends(get_session
     qvec = embed_text(req.query)
 
     # 2) SQL: hybrid search (kw via ts_rank; vec via cosine; fuse)
-    sql = text(
-        """
-        WITH kw AS (
-          SELECT mc.id AS content_id,
-                 /* weight content higher than title/author if desired */
-                 ts_rank(mi.info_tsv, plainto_tsquery('english', :q)) * 0.3 +
-                 ts_rank(mc.content_tsv, plainto_tsquery('english', :q)) * 0.7 AS kw_score
-          FROM magazine_content mc
-          JOIN magazine_info mi ON mi.id = mc.magazine_id
-          WHERE mi.info_tsv @@ plainto_tsquery('english', :q)
-             OR mc.content_tsv @@ plainto_tsquery('english', :q)
-        ),
-        vec AS (
-          SELECT mc.id AS content_id,
-                 1 - (mc.embedding <-> :qvec) AS vec_score
-          FROM magazine_content mc
-          ORDER BY mc.embedding <-> :qvec
-          LIMIT :vec_k
-        ),
-        combined AS (
-          SELECT COALESCE(kw.content_id, vec.content_id) AS content_id,
-                 COALESCE(kw.kw_score, 0) AS kw_score,
-                 COALESCE(vec.vec_score, 0) AS vec_score
-          FROM kw FULL JOIN vec USING (content_id)
-        )
-        SELECT c.content_id,
-               ( :kw_w * kw_score + :vec_w * vec_score ) AS hybrid_score,
-               mi.id AS magazine_id,
-               mi.title,
-               mi.author,
-               mi.category,
-               mc.content
-        FROM combined c
-        JOIN magazine_content mc ON mc.id = c.content_id
-        JOIN magazine_info mi ON mi.id = mc.magazine_id
-        ORDER BY hybrid_score DESC
-        LIMIT :limit;
-        """
+    sql = text("""
+    WITH q AS (
+    SELECT websearch_to_tsquery('english', :q) AS tsq
+    ),
+    kw AS (
+    SELECT mc.id AS content_id,
+            ts_rank(mi.info_tsv, q.tsq) * 0.3 +
+            ts_rank(mc.content_tsv, q.tsq) * 0.7 AS kw_score
+    FROM magazine_content mc
+    JOIN magazine_info mi ON mi.id = mc.magazine_id, q
+    WHERE mi.info_tsv @@ q.tsq OR mc.content_tsv @@ q.tsq
+    ),
+    vec AS (
+    SELECT mc.id AS content_id,
+            1 - (mc.embedding <-> CAST(:qvec AS vector)) AS vec_score
+    FROM magazine_content mc
+    ORDER BY mc.embedding <-> CAST(:qvec AS vector)
+    LIMIT CAST(:vec_k AS integer)
+    ),
+    combined AS (
+    SELECT COALESCE(kw.content_id, vec.content_id) AS content_id,
+            COALESCE(kw.kw_score, 0) AS kw_score,
+            COALESCE(vec.vec_score, 0) AS vec_score
+    FROM kw FULL JOIN vec USING (content_id)
     )
+    SELECT c.content_id,
+        (:kw_w * kw_score + :vec_w * vec_score) AS hybrid_score,
+        mi.id AS magazine_id,
+        mi.title,
+        mi.author,
+        mi.category,
+        mc.content
+    FROM combined c
+    JOIN magazine_content mc ON mc.id = c.content_id
+    JOIN magazine_info mi ON mi.id = mc.magazine_id
+    ORDER BY hybrid_score DESC
+    LIMIT CAST(:limit AS integer);
+    """)
 
+    qvec_literal = "[" + ",".join(str(float(x)) for x in qvec) + "]" 
     params = {
         "q": req.query,
-        "qvec": qvec,
+        "qvec": qvec_literal,
         "vec_k": req.top_k * 5,  # pull more from ANN to give fusion room
         "kw_w": req.kw_weight,
         "vec_w": req.vec_weight,

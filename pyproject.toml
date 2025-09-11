@@ -25,9 +25,13 @@ greenlet = "^3.0"  # explicit is fine
 sentence-transformers = "2.7.0"
 pydantic = "2.7.1"
 numpy = "1.26.4"
+psycopg = {version = "^3.2", extras = ["binary"]}
 
 [tool.poetry.scripts]
 load-data = "scripts.load_data:main_cli"
+
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.16"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
