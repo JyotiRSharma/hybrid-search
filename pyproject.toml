@@ -32,6 +32,8 @@ load-data = "scripts.load_data:main_cli"
 
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.16"
+faker = "^37.6.0"
+pandas = "^2.3.2"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

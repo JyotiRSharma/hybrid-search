@@ -1,29 +1,44 @@
-version: "3.8"
 services:
   db:
     image: pgvector/pgvector:pg16
-    platform: linux/arm64 
+    platform: linux/arm64
     environment:
-      POSTGRES_DB: magdb
+      POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
+    ports: ["5432:5432"]
     volumes:
       - ./sql:/docker-entrypoint-initdb.d
+      - ./data:/import
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d magdb"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 5s
       timeout: 3s
       retries: 30
+    networks: ["appnet"]
+
   api:
     build: .
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/magdb
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/postgres
       KW_WEIGHT: "0.5"
       VEC_WEIGHT: "0.5"
     depends_on:
       db:
         condition: service_healthy
-    ports:
-      - "8000:8000"
+    ports: ["8000:8000"]
+    networks: ["appnet"]
+
+  backfill:
+    build: .
+    command: >
+      python scripts/backfill_embeddings.py --batch 256 --postindex
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: ["jobs"]
+    networks: ["appnet"]
+
+networks:
+  appnet:
+    name: hybrid-search-net   # <— fixed, human-readable network name
