@@ -1,7 +1,6 @@
 services:
   db:
     image: pgvector/pgvector:pg16
-    platform: linux/arm64
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
@@ -29,10 +28,36 @@ services:
     ports: ["8000:8000"]
     networks: ["appnet"]
 
-  backfill:
+  backfill_worker_0:
     build: .
-    command: >
-      python scripts/backfill_embeddings.py --batch 256 --postindex
+    command: python scripts/backfill_embeddings.py --dsn postgresql://postgres:postgres@db:5432/postgres --only-null --workers 4 --me 0 --fetch-batch 256 --encode-batch 64 --cooldown 0.15
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: ["jobs"]
+    networks: ["appnet"]
+
+  backfill_worker_1:
+    build: .
+    command: python scripts/backfill_embeddings.py --dsn postgresql://postgres:postgres@db:5432/postgres --only-null --workers 4 --me 1 --fetch-batch 256 --encode-batch 64 --cooldown 0.15
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: ["jobs"]
+    networks: ["appnet"]
+
+  backfill_worker_2:
+    build: .
+    command: python scripts/backfill_embeddings.py --dsn postgresql://postgres:postgres@db:5432/postgres --only-null --workers 4 --me 2 --fetch-batch 256 --encode-batch 64 --cooldown 0.15
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: ["jobs"]
+    networks: ["appnet"]
+
+  backfill_worker_3:
+    build: .
+    command: python scripts/backfill_embeddings.py --dsn postgresql://postgres:postgres@db:5432/postgres --only-null --workers 4 --me 3 --fetch-batch 256 --encode-batch 64 --cooldown 0.15
     depends_on:
       db:
         condition: service_healthy
