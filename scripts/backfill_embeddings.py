@@ -14,7 +14,7 @@ from sentence_transformers import SentenceTransformer
 
 parser = argparse.ArgumentParser("Backfill embeddings into public.magazine_content (pgvector)")
 
-parser.add_argument("--dsn", default=os.getenv("DB_DSN", "postgresql://postgres:postgres@db:5432/postgres"))
+parser.add_argument("--dsn", default=os.getenv("DB_DSN", "postgresql://postgres:postgres@db:5432/magdb"))
 parser.add_argument("--only-null", action="store_true", help="Only process rows with embedding IS NULL")
 parser.add_argument("--limit", type=int, default=None, help="Cap total rows to process")
 
