@@ -28,14 +28,14 @@ async def search(req: SearchRequest, session: AsyncSession = Depends(get_session
     SELECT mc.id AS content_id,
             ts_rank(mi.info_tsv, q.tsq) * 0.3 +
             ts_rank(mc.content_tsv, q.tsq) * 0.7 AS kw_score
-    FROM magazine_content mc
-    JOIN magazine_info mi ON mi.id = mc.magazine_id, q
+    FROM public.magazine_content mc
+    JOIN public.magazine_info mi ON mi.id = mc.magazine_id, q
     WHERE mi.info_tsv @@ q.tsq OR mc.content_tsv @@ q.tsq
     ),
     vec AS (
     SELECT mc.id AS content_id,
             1 - (mc.embedding <-> CAST(:qvec AS vector)) AS vec_score
-    FROM magazine_content mc
+    FROM public.magazine_content mc
     ORDER BY mc.embedding <-> CAST(:qvec AS vector)
     LIMIT CAST(:vec_k AS integer)
     ),
@@ -53,8 +53,8 @@ async def search(req: SearchRequest, session: AsyncSession = Depends(get_session
         mi.category,
         mc.content
     FROM combined c
-    JOIN magazine_content mc ON mc.id = c.content_id
-    JOIN magazine_info mi ON mi.id = mc.magazine_id
+    JOIN public.magazine_content mc ON mc.id = c.content_id
+    JOIN public.magazine_info mi ON mi.id = mc.magazine_id
     ORDER BY hybrid_score DESC
     LIMIT CAST(:limit AS integer);
     """)

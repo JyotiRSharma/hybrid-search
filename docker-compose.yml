@@ -66,4 +66,3 @@ services:
 
 networks:
   appnet:
-    name: hybrid-search-net   # <— fixed, human-readable network name

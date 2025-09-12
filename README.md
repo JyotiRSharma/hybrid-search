@@ -17,7 +17,11 @@ Below are instructions for development, debugging, and container management.
           ```
     2. Download `articles.csv` in the `data` folder
           ```bash
+          # 1_000_000 rows articles.csv
           curl -L -o articles.csv https://y7k3t6xm33.ufs.sh/f/mJpxIi6iJ8L6zCHT4QiNkoHlxjC0NJmERpfI15znaVL6y7dB
+
+          # 10_000 rows articles.csv
+          curl -L -o articles.csv https://y7k3t6xm33.ufs.sh/f/mJpxIi6iJ8L669e2dqbbZDdme7XIC1gFAapRsJ6yWQ5MKjvq
           ```
     3. Install Docker
           ```bash
@@ -77,6 +81,12 @@ Below are instructions for development, debugging, and container management.
 docker compose up -d db
 docker compose up -d api
 ```
+
+---
+
+## Demo
+
+![Demo Video](https://y7k3t6xm33.ufs.sh/f/mJpxIi6iJ8L6hsVGQ0uTDU4CVEF1YOSsQdeibvjNGzyBxKknv)
 
 ---
 
@@ -172,6 +182,12 @@ Run the following in sequence:
 ```bash
 # Stop and remove containers, networks, and orphans for this project
 docker compose down --remove-orphans
+
+# Remove profiles
+docker compose --profile jobs down --volumes --remove-orphans
+
+# Nuke the project
+docker compose -p hybrid-search down --volumes --remove-orphans
 
 # Remove dangling networks (safe)
 docker network prune -f
