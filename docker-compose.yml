@@ -30,7 +30,7 @@ services:
 
   backfill_worker_0:
     build: .
-    command: python scripts/backfill_embeddings.py --dsn postgresql://postgres:postgres@db:5432/magdb --only-null --workers 4 --me 0 --fetch-batch 256 --encode-batch 64 --cooldown 0.15
+    command: python scripts/backfill_embeddings.py --dsn postgresql://postgres:postgres@db:5432/magdb --only-null --workers 4 --me 0 --fetch-batch 512 --encode-batch 128 --cooldown 0.15
     depends_on:
       db:
         condition: service_healthy
@@ -39,7 +39,7 @@ services:
 
   backfill_worker_1:
     build: .
-    command: python scripts/backfill_embeddings.py --dsn postgresql://postgres:postgres@db:5432/magdb --only-null --workers 4 --me 1 --fetch-batch 256 --encode-batch 64 --cooldown 0.15
+    command: python scripts/backfill_embeddings.py --dsn postgresql://postgres:postgres@db:5432/magdb --only-null --workers 4 --me 1 --fetch-batch 512 --encode-batch 128 --cooldown 0.15
     depends_on:
       db:
         condition: service_healthy
@@ -48,7 +48,7 @@ services:
 
   backfill_worker_2:
     build: .
-    command: python scripts/backfill_embeddings.py --dsn postgresql://postgres:postgres@db:5432/magdb --only-null --workers 4 --me 2 --fetch-batch 256 --encode-batch 64 --cooldown 0.15
+    command: python scripts/backfill_embeddings.py --dsn postgresql://postgres:postgres@db:5432/magdb --only-null --workers 4 --me 2 --fetch-batch 512 --encode-batch 128 --cooldown 0.15
     depends_on:
       db:
         condition: service_healthy
@@ -57,7 +57,7 @@ services:
 
   backfill_worker_3:
     build: .
-    command: python scripts/backfill_embeddings.py --dsn postgresql://postgres:postgres@db:5432/magdb --only-null --workers 4 --me 3 --fetch-batch 256 --encode-batch 64 --cooldown 0.15
+    command: python scripts/backfill_embeddings.py --dsn postgresql://postgres:postgres@db:5432/magdb --only-null --workers 4 --me 3 --fetch-batch 512 --encode-batch 128 --cooldown 0.15
     depends_on:
       db:
         condition: service_healthy
