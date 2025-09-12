@@ -86,7 +86,9 @@ docker compose up -d api
 
 ## Demo
 
-![Demo Video](https://y7k3t6xm33.ufs.sh/f/mJpxIi6iJ8L6hsVGQ0uTDU4CVEF1YOSsQdeibvjNGzyBxKknv)
+
+https://github.com/user-attachments/assets/9aeacba9-fd3f-4d1d-a437-8dcadc543cf8
+
 
 ---
 
